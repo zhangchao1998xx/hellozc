@@ -1,0 +1,33 @@
+import json
+import ftxClient
+
+with open('config.json') as config:
+    CONFIG = json.load(config)
+
+# 创建子账户
+
+# 获取需要创建的子账户别名
+with open('subAccountList') as f:
+    subList = f.readlines()
+subList = [sub.rstrip() for sub in subList]
+print(subList)
+
+# 创建子账户
+ftx = ftxClient.FtxClient(CONFIG["ApiKey"], CONFIG["ApiSecret"])
+for i in subList:
+    ftx.create_subaccount(i)
+    print(f'{i} created')
+
+# 获取子账户充值地址
+addressListTrx = {}
+addressListBsc = {}
+for i in subList:
+    ftx = ftxClient.FtxClient(CONFIG["ApiKey"], CONFIG["ApiSecret"], i)
+    resp1 = ftx.get_deposit_address_list('USDT', 'bsc')
+    resp2 = ftx.get_deposit_address_list('USDT', 'trx')
+    addressListBsc[i] = resp1[0]['address']
+    addressListTrx[i] = resp2[0]['address']
+for key, value in addressListBsc.items():
+    print(key, value)
+for key, value in addressListTrx.items():
+    print(key, value)
